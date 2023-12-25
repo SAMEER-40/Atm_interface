@@ -1,4 +1,3 @@
-# app/main.py
 from flask import Flask, request, jsonify
 from app.balancer import handle_query
 from app.cache import get_cached_response, cache_response, cache
@@ -22,6 +21,10 @@ def dns_query():
         return cached_response
 
     response = handle_query(query)
+    if not response:
+        logging.debug("Failed to get response from handle_query")
+        return jsonify({'error': 'Failed to get DNS response'}), 500
+
     cache_response(query, response, ttl=300)
     logging.debug("Returning fresh DNS response")
     return response
@@ -40,4 +43,4 @@ def index():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=8000)

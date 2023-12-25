@@ -1,7 +1,10 @@
 import dns.message
 import dns.query
 import random
+import dns.resolver
 import logging
+
+from flask import jsonify
 
 dns_servers = ['8.8.8.8', '8.8.4.4', '1.1.1.1']
 
@@ -32,9 +35,15 @@ def query_dns(domain):
         return None
 
 
-def handle_query(domain):
-    """Handle a DNS query and return the response in text format."""
-    response = query_dns(domain)
-    if response:
-        return response.to_text()
-    return None
+def handle_query(query):
+    try:
+        resolver = dns.resolver.Resolver()
+        response = resolver.resolve(query, 'A')  # Querying A records
+        return jsonify({'response': [str(rdata) for rdata in response]})
+    except dns.resolver.NoAnswer:
+        return jsonify({'error': 'No answer for the query'}), 404
+    except dns.exception.Timeout:
+        return jsonify({'error': 'DNS query timed out'}), 504
+    except Exception as e:
+        logging.error(f"General exception: {e}")
+        return None
