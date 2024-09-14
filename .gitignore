@@ -1,0 +1,9 @@
+
+#### **`.gitignore`**
+Specifies files and directories that should be ignored by Git.
+```gitignore
+*.pyc
+__pycache__/
+venv/
+.env
+.DS_Store
